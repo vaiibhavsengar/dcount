@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DCount - Premium Countdown Timer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      /* Light Theme Variables */
+      --bg-grad-1: #e2e8f0;
+      --bg-grad-2: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --glass-bg: rgba(255, 255, 255, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --accent: #007AFF;
+      --ring-bg: rgba(0, 0, 0, 0.06);
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      --btn-bg: rgba(255, 255, 255, 0.5);
+    }
+
+    [data-theme="dark"] {
+      /* Dark Theme Variables */
+      --bg-grad-1: #0f1115;
+      --bg-grad-2: #1e222a;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --glass-bg: rgba(30, 34, 42, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.05);
+      --ring-bg: rgba(255, 255, 255, 0.08);
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      --btn-bg: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+      background-size: 200% 200%;
+      animation: gradientBG 15s ease infinite;
+      color: var(--text-primary);
+      overflow: hidden;
+      transition: background 0.5s ease;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 420px;
+      padding: 2.5rem 2rem;
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 35px;
+      box-shadow: var(--shadow);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      margin: 0 0 2rem 0;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    .timer-container {
+      position: relative;
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 1/1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .progress-ring {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .progress-ring__circle {
+      transition: stroke 0.5s ease;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      filter: drop-shadow(0 0 8px var(--accent));
+    }
+
+    .time-display {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .time-inputs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .time-input {
+      background: transparent;
+      border: none;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      width: 80px;
+      text-align: center;
+      appearance: textfield;
+      outline: none;
+      transition: color 0.3s ease, transform 0.2s ease;
+      padding: 0;
+      letter-spacing: -1px;
+    }
+
+    .time-input::-webkit-outer-spin-button,
+    .time-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .time-input:hover:not(:disabled) {
+      color: var(--accent);
+    }
+
+    .time-input:focus {
+      color: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .time-input::selection {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .colon {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin: 0 -2px;
+      padding-bottom: 8px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-icon, .btn-play {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .btn-icon {
+      width: 55px;
+      height: 55px;
+      background: var(--btn-bg);
+      color: var(--text-primary);
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    [data-theme="dark"] .btn-icon {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .btn-icon:hover {
+      background: var(--glass-border);
+      transform: scale(1.05);
+    }
+
+    .btn-play {
+      width: 75px;
+      height: 75px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.8rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      padding-left: 4px; /* visually center play icon */
+    }
+
+    .btn-play.playing {
+      padding-left: 0; /* center pause icon */
+    }
+
+    .btn-play:hover {
+      transform: scale(1.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      filter: brightness(1.1);
+    }
+
+    .btn-play:active, .btn-icon:active {
+      transform: scale(0.95);
+    }
+
+    .hideable {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      max-height: 200px;
+      opacity: 1;
+      overflow: hidden;
+    }
+
+    .presets {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .preset-btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 20px;
+      background: var(--btn-bg);
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .preset-btn:hover {
+      color: var(--text-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .preset-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .settings {
+      display: flex;
+      gap: 1.8rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--glass-border);
+      width: 100%;
+      justify-content: center;
+    }
+
+    .setting-btn {
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      transition: color 0.3s ease, transform 0.2s ease;
+      position: relative;
+    }
+
+    .setting-btn:hover {
+      color: var(--text-primary);
+      transform: scale(1.15);
+    }
+
+    .setting-btn.active {
+      color: var(--accent);
+    }
+
+    /* Shake animation */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+      20%, 40%, 60%, 80% { transform: translateX(6px); }
+    }
+
+    .shake {
+      animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    /* Focus mode transitions */
+    body.focus-mode .app-container {
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    body.focus-mode header {
+      opacity: 0;
+    }
+
+    body.focus-mode .hideable {
+      max-height: 0;
+      opacity: 0;
+      margin: 0;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    body.focus-mode .controls {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    body.focus-mode:hover .controls,
+    body.focus-mode:hover .hideable {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    body.focus-mode:hover .hideable {
+      max-height: 200px;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 25px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+      letter-spacing: 0.5px;
+    }
+
+    footer:hover {
+      opacity: 1;
+    }
+
+    body.focus-mode footer {
+      opacity: 0;
+    }
+
+    @media (max-width: 480px) {
+      .app-container {
+        padding: 2rem 1.5rem;
+        border-radius: 30px;
+        max-width: 90%;
+      }
+      .timer-container {
+        max-width: 250px;
+      }
+      .time-input {
+        font-size: 3.2rem;
+        width: 65px;
+      }
+      .colon {
+        font-size: 2.5rem;
+      }
+      .btn-play {
+        width: 65px;
+        height: 65px;
+        font-size: 1.5rem;
+      }
+      .btn-icon {
+        width: 50px;
+        height: 50px;
+      }
+      .preset-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container" id="app">
+    <header>
+      <h1>DCount</h1>
+    </header>
+    
+    <div class="timer-container" id="timerContainer">
+      <svg class="progress-ring" viewBox="0 0 300 300">
+        <circle class="progress-ring__circle-bg" stroke="var(--ring-bg)" stroke-width="6" fill="transparent" r="140" cx="150" cy="150"/>
+        <circle class="progress-ring__circle" stroke="var(--accent)" stroke-width="8" fill="transparent" r="140" cx="150" cy="150" stroke-linecap="round"/>
+      </svg>
+      
+      <div class="time-display">
+        <div class="time-inputs">
+           <input type="number" id="inputH" min="0" max="99" value="00" class="time-input">
+           <span class="colon">:</span>
+           <input type="number" id="inputM" min="0" max="59" value="25" class="time-input">
+           <span class="colon">:</span>
+           <input type="number" id="inputS" min="0" max="59" value="00" class="time-input">
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="btn-icon" id="btnReset" title="Reset Timer"><i class="fa-solid fa-rotate-left"></i></button>
+      <button class="btn-play" id="btnPlayPause" title="Start/Pause"><i class="fa-solid fa-play" id="playIcon"></i></button>
+    </div>
+    
+    <div class="hideable">
+      <div class="presets">
+        <button class="preset-btn" data-time="300">5m</button>
+        <button class="preset-btn active" data-time="1500">25m</button>
+        <button class="preset-btn" data-time="3600">1h</button>
+        <button class="preset-btn" data-time="7200">2h</button>
+      </div>
+      
+      <div class="settings">
+        <button class="setting-btn" id="btnTheme" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+        <button class="setting-btn" id="btnAccent" title="Change Accent"><i class="fa-solid fa-palette"></i></button>
+        <button class="setting-btn" id="btnFocus" title="Focus Mode"><i class="fa-solid fa-expand"></i></button>
+        <button class="setting-btn" id="btnRepeat" title="Repeat Mode"><i class="fa-solid fa-repeat"></i></button>
+        <button class="setting-btn active" id="btnSound" title="Toggle Sound"><i class="fa-solid fa-bell"></i></button>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <p>Made by Sengar Production</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Variables & Elements ---
+      const inputs = [
+        document.getElementById('inputH'),
+        document.getElementById('inputM'),
+        document.getElementById('inputS')
+      ];
+      const btnPlayPause = document.getElementById('btnPlayPause');
+      const playIcon = document.getElementById('playIcon');
+      const btnReset = document.getElementById('btnReset');
+      const presetBtns = document.querySelectorAll('.preset-btn');
+      const circle = document.querySelector('.progress-ring__circle');
+      
+      // Ring Math
+      const radius = parseFloat(circle.getAttribute('r')) || 140;
+      const circumference = radius * 2 * Math.PI;
+      circle.style.strokeDasharray = `${circumference} ${circumference}`;
+      circle.style.strokeDashoffset = 0;
+
+      // State
+      let isRunning = false;
+      let totalTime = 1500; // 25 min default
+      let timeRemaining = totalTime;
+      let endTime = null;
+      let reqAnimFrameId = null;
+      let lastDisplayedTime = -1;
+      
+      // Preferences
+      let isFocusMode = false;
+      let isRepeatMode = false;
+      let isSoundEnabled = true;
+      const accents = ['#007AFF', '#AF52DE', '#34C759', '#FF9500', '#FF2D55', '#32ADE6'];
+      let currentAccentIndex = 0;
+
+      // Audio Context
+      let audioCtx = null;
+
+      // --- Initialization ---
+      loadState();
+
+      // Ensure AudioContext is initialized on first user interaction
+      document.body.addEventListener('click', () => {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }, { once: true });
+
+      // --- Core Timer Logic ---
+      function updateTimer() {
+        if (!isRunning) return;
+        
+        const now = Date.now();
+        const msRemaining = endTime - now;
+        timeRemaining = Math.ceil(msRemaining / 1000);
+        
+        if (msRemaining <= 0) {
+          timeRemaining = 0;
+          timerEnd();
+        } else {
+          reqAnimFrameId = requestAnimationFrame(updateTimer);
+        }
+        
+        updateDisplay(timeRemaining);
+        updateRing(Math.max(0, msRemaining / 1000));
+      }
+
+      function startTimer() {
+        if (timeRemaining <= 0) return;
+        
+        isRunning = true;
+        endTime = Date.now() + timeRemaining * 1000;
+        
+        inputs.forEach(el => el.disabled = true);
+        playIcon.className = 'fa-solid fa-pause';
+        btnPlayPause.classList.add('playing');
+        
+        reqAnimFrameId = requestAnimationFrame(updateTimer);
+      }
+
+      function pauseTimer() {
+        isRunning = false;
+        if (reqAnimFrameId) cancelAnimationFrame(reqAnimFrameId);
+        
+        inputs.forEach(el => el.disabled = false);
+        playIcon.className = 'fa-solid fa-play';
+        btnPlayPause.classList.remove('playing');
+        saveState();
+      }
+
+      function resetTimer() {
+        pauseTimer();
+        timeRemaining = totalTime;
+        updateDisplay(timeRemaining);
+        updateRing(timeRemaining);
+      }
+
+      function timerEnd() {
+        pauseTimer();
+        updateDisplay(0);
+        updateRing(0);
+        
+        if (isSoundEnabled) playBeep();
+        
+        const container = document.getElementById('timerContainer');
+        container.classList.add('shake');
+        setTimeout(() => container.classList.remove('shake'), 820);
+        
+        if (isRepeatMode) {
+          setTimeout(() => {
+            timeRemaining = totalTime;
+            startTimer();
+          }, 1500);
+        }
+      }
+
+      // --- UI Updates ---
+      function updateDisplay(seconds) {
+        if (seconds === lastDisplayedTime) return;
+        lastDisplayedTime = seconds;
+        
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        
+        inputs[0].value = h.toString().padStart(2, '0');
+        inputs[1].value = m.toString().padStart(2, '0');
+        inputs[2].value = s.toString().padStart(2, '0');
+      }
+
+      function updateRing(preciseTimeRemaining) {
+        if (totalTime === 0) {
+          circle.style.strokeDashoffset = 0;
+          return;
+        }
+        const percent = preciseTimeRemaining / totalTime;
+        const offset = circumference - (percent * circumference);
+        circle.style.strokeDashoffset = offset;
+      }
+
+      function updateActivePreset() {
+        presetBtns.forEach(btn => {
+          if (parseInt(btn.dataset.time) === totalTime) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+      }
+
+      // --- Input Handling ---
+      function handleInput() {
+        let h = parseInt(inputs[0].value) || 0;
+        let m = parseInt(inputs[1].value) || 0;
+        let s = parseInt(inputs[2].value) || 0;
+        
+        totalTime = h * 3600 + m * 60 + s;
+        timeRemaining = totalTime;
+        
+        updateRing(timeRemaining);
+        updateActivePreset();
+        saveState();
+      }
+
+      inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          this.select();
+        });
+        
+        input.addEventListener('blur', function() {
+          let val = parseInt(this.value);
+          if (isNaN(val) || val < 0) val = 0;
+          
+          if (this.id !== 'inputH' && val > 59) val = 59;
+          if (this.id === 'inputH' && val > 99) val = 99;
+          
+          this.value = val.toString().padStart(2, '0');
+          handleInput();
+        });
+        
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') this.blur();
+        });
+      });
+
+      // --- Button Listeners ---
+      btnPlayPause.addEventListener('click', () => {
+        if (isRunning) {
+          pauseTimer();
+        } else {
+          if (timeRemaining <= 0 && totalTime > 0) timeRemaining = totalTime;
+          startTimer();
+        }
+      });
+
+      btnReset.addEventListener('click', resetTimer);
+
+      presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const time = parseInt(btn.dataset.time);
+          totalTime = time;
+          timeRemaining = time;
+          if (isRunning) pauseTimer();
+          
+          updateDisplay(timeRemaining);
+          updateRing(timeRemaining);
+          updateActivePreset();
+          saveState();
+        });
+      });
+
+      // --- Settings Listeners ---
+      document.getElementById('btnTheme').addEventListener('click', function() {
+        const isDark = document.body.dataset.theme === 'dark';
+        document.body.dataset.theme = isDark ? 'light' : 'dark';
+        this.querySelector('i').className = isDark ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        saveState();
+      });
+
+      document.getElementById('btnAccent').addEventListener('click', () => {
+        currentAccentIndex = (currentAccentIndex + 1) % accents.length;
+        document.documentElement.style.setProperty('--accent', accents[currentAccentIndex]);
+        saveState();
+      });
+
+      document.getElementById('btnFocus').addEventListener('click', function() {
+        isFocusMode = !isFocusMode;
+        document.body.classList.toggle('focus-mode', isFocusMode);
+        this.classList.toggle('active', isFocusMode);
+        saveState();
+      });
+
+      document.getElementById('btnRepeat').addEventListener('click', function() {
+        isRepeatMode = !isRepeatMode;
+        this.classList.toggle('active', isRepeatMode);
+        saveState();
+      });
+
+      document.getElementById('btnSound').addEventListener('click', function() {
+        isSoundEnabled = !isSoundEnabled;
+        this.classList.toggle('active', isSoundEnabled);
+        this.querySelector('i').className = isSoundEnabled ? 'fa-solid fa-bell' : 'fa-solid fa-bell-slash';
+        saveState();
+      });
+
+      // --- Audio Beep ---
+      function playBeep() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        for(let i=0; i<3; i++) {
+          setTimeout(() => {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+            
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.2);
+          }, i * 300);
+        }
+      }
+
+      // --- Local Storage ---
+      function saveState() {
+        try {
+          const state = {
+            totalTime,
+            isFocusMode,
+            isRepeatMode,
+            isSoundEnabled,
+            theme: document.body.dataset.theme || 'light',
+            accentIndex: currentAccentIndex
+          };
+          localStorage.setItem('dcount_state', JSON.stringify(state));
+        } catch (e) {
+          console.warn('LocalStorage save failed:', e);
+        }
+      }
+
+      function loadState() {
+        try {
+          const saved = localStorage.getItem('dcount_state');
+          if (saved) {
+            const state = JSON.parse(saved);
+            if (state) {
+              totalTime = state.totalTime || 1500;
+              timeRemaining = totalTime;
+              
+              if (state.isFocusMode) {
+                isFocusMode = true;
+                document.body.classList.add('focus-mode');
+                document.getElementById('btnFocus').classList.add('active');
+              }
+              
+              if (state.isRepeatMode) {
+                isRepeatMode = true;
+                document.getElementById('btnRepeat').classList.add('active');
+              }
+              
+              if (state.isSoundEnabled === false) {
+                isSoundEnabled = false;
+                const btn = document.getElementById('btnSound');
+                btn.classList.remove('active');
+                btn.querySelector('i').className = 'fa-solid fa-bell-slash';
+              }
+              
+              if (state.theme === 'dark') {
+                document.body.dataset.theme = 'dark';
+                document.getElementById('btnTheme').querySelector('i').className = 'fa-solid fa-sun';
+              }
+              
+              currentAccentIndex = state.accentIndex || 0;
+              document.documentElement.style.setProperty('--accent', accents[currentAccentIndex]);
+            }
+          }
+        } catch (e) {
+          console.warn('LocalStorage error:', e);
+        }
+        
+        updateDisplay(timeRemaining);
+        updateRing(timeRemaining);
+        updateActivePreset();
+      }
+    });
+  </script>
+</body>
+</html>
