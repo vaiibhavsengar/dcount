@@ -1,4 +1,4 @@
-# ⏳ Countdown Timer
+# ⏳ Custom Countdown Timer
 
 A simple and interactive countdown timer built using **HTML, CSS, and JavaScript**. The application allows users to set a timer and track the remaining time in real time through a clean and responsive interface.
 
