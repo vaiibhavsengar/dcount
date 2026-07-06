@@ -47,5 +47,4 @@ A simple and interactive countdown timer built using **HTML, CSS, and JavaScript
 * 📅 Custom date and event countdowns
 
 ## 📜 License
-
-This project was created for educational and learning purposes.
+This project was created for educational and learning purposes and Approved by Sengar Industries & Production
